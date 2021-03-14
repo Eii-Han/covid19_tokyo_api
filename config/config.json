@@ -1,0 +1,30 @@
+{
+    "kanagawa": {
+        "csv_url": "http://www.pref.kanagawa.jp/osirase/1369/data/csv/patient.csv",
+        "encoding": "shift-jis",
+        "date_key": "date",
+        "date_format": "%Y-%m-%d",
+        "address_columns": ["address"],
+        "change_columns": {
+            "居住地": "address",
+            "年代": "age",
+            "性別": "gender",
+            "発表日": "date"
+         }
+    },
+    "yokohama": {
+        "csv_url": "https://www.city.yokohama.lg.jp/city-info/koho-kocho/koho/topics/corona-data.files/141003_yokohama_covid19_patients.csv",
+        "encoding": "utf-8",
+        "date_key": "date",
+        "date_format": "%Y-%m-%d",
+        "address_columns": ["prefecture", "city"],
+        "change_columns": {
+           "No": "patient_no",
+           "都道府県名": "prefecture",
+           "市区町村名": "city",
+           "患者_年代": "age",
+           "患者_状態": "condition",
+           "公表日": "date"
+         }
+    }
+}

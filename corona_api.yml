@@ -1,0 +1,28 @@
+swagger: "2.0"
+info:
+  description: Corona
+  version: "1.0"
+  title: Swagger Rest Api
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+
+basePath: "/corona"
+
+paths:
+  /1.0/number/patients:
+    get: 
+      operationId: "corona.get_patients"
+      tags:
+        - patients_number
+      summary: tbc
+      description: tbc
+      parameters:
+        - name: address
+          in: query
+          type: string
+          required: true
+      responses:
+        200:
+          description: good
