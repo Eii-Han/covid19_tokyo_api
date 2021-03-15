@@ -1,28 +1,84 @@
+# Developed Date; 2021-03-10
+# Developer: Poon Ying Wai
+# Description: pandasライブラリで定義したクラスを管理するモジュール
+#
+
 import pandas as pd
 import datetime
+import io
+import enum
+import typing
 
 from common.singleton import Singleton
 
+class InvalidKeyError(Exception):
+    pass
+
+class DataFrameMetaKey(enum.Enum):
+    """DataFrameのメタ情報キーの値を保存する列挙型
+
+　  以下のパラメータを定義しています。
+    CREATED_DATE: 生成日時
+    UPDATED_DATE: 更新日時
+    DATAFRAME:　DataFrame本体
+
+    """
+
+    CREATED_DATE = "_createdDate"
+    UPDATED_DATE = "_updatedDate"
+    DATAFRAME = "dated_df"
 
 class PandasHolder(metaclass=Singleton):
+    """pandasの地域感染情報保存用のクラス
+    
+    Attributes:
+        _data_src: 全データ格納用の変数
+    """
 
     def __init__(self):
-        self._data_src = {}
+        """コンストラクタ
+        
+        全データ格納用の変数を初期化する（初回のみ）
+        """
+        self._data_src = dict()
 
-    def add_data(self, data_name, data_obj, rename_dict):
+    def add_data(self, data_name:str, data_obj: io.StringIO, rename_dict: dict, forced: bool = False):
+        """新しい感染情報を追加するメソッド
+
+        指定した地域の当日の最新感染情報をDataFrameに追加・更新するメソッド
+        forcedが真の場合、当日のデータがあっても強制更新を実行する
+
+        Args:
+            data_name: 地域の感染情報データの識別名
+            data_obj:感染情報データのファイルオブジェクト
+            rename_dict: 各カラムの再命名するためのメタ情報
+            forced: 強制更新かどうかを判定するための引数
+        """
         dt_now = datetime.datetime.now()
         now_str = dt_now.strftime('%Y-%m-%d %H:%M:%S')
-        self._data_src[data_name] = {}
-        self._data_src[data_name]['_createdDate'] = now_str
-        self._data_src[data_name]['dated_df'] = self._create_dataframe(data_obj, rename_dict)
+        if forced or now_str != self.get_data(data_name, DataFrameMetaKey.UPDATED_DATE):
+            if not self._data_src.get(data_name):
+                self._data_src[data_name] = dict()
+                self._data_src[data_name][DataFrameMetaKey.CREATED_DATE] = now_str 
+            self._data_src[data_name][DataFrameMetaKey.UPDATED_DATE] = now_str
+            self._data_src[data_name][DataFrameMetaKey.DATAFRAME] = self._create_dataframe(data_obj, rename_dict)
 
-    def get_data(self, data_name):
+    def get_data(self, data_name: str, meta_key: typing.Union[DataFrameMetaKey, str]) -> typing.Any:
         if not self._data_src.get(data_name):
             return None
-        return self._data_src[data_name]['dated_df']
+        meta_key = self._change_key(meta_key)
+        return self._data_src[data_name].get(meta_key)
 
-    def get_updated_time(self, data_name):
-        return self._data_src[data_name]['_createdDate']
+    @staticmethod
+    def _change_key(meta_key: typing.Union[DataFrameMetaKey, str]) -> DataFrameMetaKey:
+        if isinstance(meta_key, str):
+            for m_key in DataFrameMetaKey:
+                if m_key.value == meta_key:
+                    meta_key = m_key
+                    break
+            else:
+                raise InvalidKeyError("DataFrameMetaKeyクラスで定義したキーを使用してください")
+        return meta_key
 
     @staticmethod
     def _create_dataframe(data_obj, rename_dict):

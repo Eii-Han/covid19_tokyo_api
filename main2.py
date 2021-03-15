@@ -19,11 +19,12 @@ pd_holder.add_data(
     file_reader.get_csv_file_like_obj,
     conf_json.get('change_columns'))
 
-df = pd_holder.get_data(data_name)
+df = pd_holder.get_data(data_name, "dated_df")
 
 df_man = DataFrameMan()
 df_man.set_data_frame(df)
 today_str = "2020-05-11"
+
 
 target_df = df_man.find_records_by_address_on_same_date(
     "横浜市",
