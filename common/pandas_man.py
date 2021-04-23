@@ -10,6 +10,8 @@ import enum
 import typing
 
 from common.singleton import Singleton
+from flask.cli import _validate_key
+from builtins import staticmethod
 
 class InvalidKeyError(Exception):
     pass
@@ -42,7 +44,7 @@ class PandasHolder(metaclass=Singleton):
         """
         self._data_src = dict()
 
-    def add_data(self, data_name:str, data_obj: io.StringIO, rename_dict: dict, forced: bool = False):
+    def add_data(self, data_name: str, data_obj: io.StringIO, rename_dict: dict, forced: bool = False):
         """新しい感染情報を追加するメソッド
 
         指定した地域の当日の最新感染情報をDataFrameに追加・更新するメソッド
@@ -54,8 +56,12 @@ class PandasHolder(metaclass=Singleton):
             rename_dict: 各カラムの再命名するためのメタ情報
             forced: 強制更新かどうかを判定するための引数
         """
+        
+        # 現在時刻を取得
         dt_now = datetime.datetime.now()
         now_str = dt_now.strftime('%Y-%m-%d %H:%M:%S')
+        
+        # 患者データをキャッシュに保存するデータフレームを生成
         if forced or now_str != self.get_data(data_name, DataFrameMetaKey.UPDATED_DATE):
             if not self._data_src.get(data_name):
                 self._data_src[data_name] = dict()
@@ -64,6 +70,17 @@ class PandasHolder(metaclass=Singleton):
             self._data_src[data_name][DataFrameMetaKey.DATAFRAME] = self._create_dataframe(data_obj, rename_dict)
 
     def get_data(self, data_name: str, meta_key: typing.Union[DataFrameMetaKey, str]) -> typing.Any:
+        """特定のデータ取得メソッド
+        
+         キャッシュされたデータフレームから地域の感染情報を取得して、
+        meta_keyで指定したデータを取得する
+        
+        Args:
+            data_name: 地域の感染情報データの識別名
+            meta_key: メタキー
+        Returns:
+            特定のデータ
+        """
         if not self._data_src.get(data_name):
             return None
         meta_key = self._change_key(meta_key)
@@ -71,6 +88,16 @@ class PandasHolder(metaclass=Singleton):
 
     @staticmethod
     def _change_key(meta_key: typing.Union[DataFrameMetaKey, str]) -> DataFrameMetaKey:
+        """キーの値変更メソッド
+        
+        列挙型のDataFrameMetaKeyキー値を文字列型に変更する。
+        
+        Args:
+            data_name: 地域の感染情報データの識別名
+            meta_key: メタキー
+        Returns:
+            特定のデータ
+        """
         if isinstance(meta_key, str):
             for m_key in DataFrameMetaKey:
                 if m_key.value == meta_key:
@@ -89,13 +116,19 @@ class PandasHolder(metaclass=Singleton):
         return df
 
 
-class DataFrameMan():
+class DataFrameMan(metaclass=Singleton):
 
-    def __init__(self):
-        self._dataframe = None
-
-    def set_data_frame(self, dataframe):
-        self._dataframe = dataframe
+    @staticmethod
+    def change_date_type_to_datetime(dataframe, date_key):
+        dataframe[date_key] = pd.to_datetime(dataframe[date_key])
+        return dataframe
+    
+    @staticmethod
+    def change_date_type_to_str(dataframe, date_key):
+        dates = dataframe[date_key]
+        dates = dates.apply(lambda x: x.strftime('%Y-%m-%d'))
+        dataframe[date_key] = dates
+        return dataframe
    
     @staticmethod 
     def _get_data_frame_by_group(dataframe, group_name, group_value):
@@ -105,7 +138,7 @@ class DataFrameMan():
         return None
 
     @staticmethod
-    def _search_data_frame_value(dataframe, column_name, keyword):
+    def search_dataframe_value(dataframe, column_name, keyword):
         _filter = dataframe[column_name].str.contains(keyword)
         return dataframe[_filter]
 
@@ -116,19 +149,20 @@ class DataFrameMan():
         if len(df_list) == 1:
             return df_list[0]
         return pd.concat(df_list)
-
-    def find_records_by_address_on_same_date(
-            self, address, address_columns, date_key ,date_str):
-        date_df = self._get_data_frame_by_group(
-                      self._dataframe, date_key, date_str)
-        if date_df.empty:
-            return date_df
+    
+    @staticmethod
+    def find_records_within_period(dataframe, date_key ,start_date, end_date):
+        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
+        return dataframe[
+            (dataframe[date_key] >= start_date) & (dataframe[date_key] < end_date)]
+        
+    def find_records_by_address(self, dataframe, address_columns, address):
         df_list = []
         for addr_col in address_columns:
-            addr_df = self._search_data_frame_value(date_df, addr_col, address)
+            addr_df = self.search_dataframe_value(dataframe, addr_col, address)
             df_list.append(addr_df)
         return self._concat_dateframe_list(df_list)
-
-
+        
 if __name__ == "__main__":
     PandasHolder()

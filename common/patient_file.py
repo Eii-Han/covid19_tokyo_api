@@ -1,3 +1,7 @@
+# Developed Date; 2021-03-10
+# Developer: Poon Ying Wai
+# Description: ネット上から患者情報を取得するモジュール
+#
 import requests
 import io
 

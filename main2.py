@@ -22,21 +22,15 @@ pd_holder.add_data(
 df = pd_holder.get_data(data_name, "dated_df")
 
 df_man = DataFrameMan()
-df_man.set_data_frame(df)
-today_str = "2020-05-11"
+
+import pprint
+df_man.change_date_type_to_datetime(df , conf_json["date_key"])
+df = df_man.find_records_within_period(df, conf_json["date_key"], "2021-04-21", '2021-04-22')
+df = df_man.find_records_by_address(df, conf_json["address_columns"], '横浜')
+df = df_man.search_dataframe_value(df, 'age', '20代')
+pprint.pprint(df_man.change_date_type_to_str(df, conf_json["date_key"]).to_dict(orient='records'))
+
+# TODO グルーピング機能を実装
 
 
-target_df = df_man.find_records_by_address_on_same_date(
-    "横浜市",
-    conf_json["address_columns"],
-    conf_json["date_key"],
-    today_str)
 
-if not target_df.empty:
-    records = target_df.to_dict(orient='records')
-    count = len(target_df.index)
-    import pprint
-    print("count=", count)
-    pprint.pprint(records)
-else:
-    print("No records")
