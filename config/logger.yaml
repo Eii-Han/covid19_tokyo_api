@@ -1,0 +1,19 @@
+version: 1
+formatters:
+  simple:
+    format: '%(name)s - %(message)s'
+handlers:
+  sysloghandler:
+    class: logging.handlers.SysLogHandler
+    level: DEBUG
+    formatter: simple
+    address: [localhost, 514]
+    facility: user
+loggers:
+  syslogger:
+    level: DEBUG
+    handlers: [sysloghandler]
+    propagate: no
+root:
+  level: DEBUG
+  handlers: [sysloghandler]

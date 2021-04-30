@@ -2,16 +2,21 @@ from common.singleton import Singleton
 from common.config import ConfigMan
 from common.patient_file import PatientFileReader
 from common.pandas_man import PandasHolder
+from common.syslogman import SyslogMan
 import collections
 
 class Controller(metaclass=Singleton):
 
     def __init__(self):
         self._conf_man = ConfigMan('config/config.json')
+        self._sm = SyslogMan('config/logger.yaml')
         self._dataframes = dict()
 
     def get_config_json(self, area: str):
         return self._conf_man.get_conf(area)
+
+    def get_syslog_man(self):
+        return self._sm
 
     def get_dataframe(self, area: str, force: bool):
         conf_json = self.get_config_json(area)
