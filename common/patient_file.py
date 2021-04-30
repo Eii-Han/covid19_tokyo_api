@@ -5,6 +5,7 @@
 import requests
 import io
 
+
 class PatientFileReader(object):
     """地域のデータファイルを読み込む機能を提供するクラス
     
@@ -12,7 +13,8 @@ class PatientFileReader(object):
         _readable_cont: デコード済みの地域データ
 
     """
-    def __init__(self, get_url:str , encoding:str ="utf-8"):
+
+    def __init__(self, get_url: str, encoding: str = "utf-8"):
         """コンストラクタ
         
         ネット上に公開された情報を取得して、データをデコードして格納する
@@ -34,5 +36,3 @@ class PatientFileReader(object):
         変換機能を提供する。
         """
         return io.StringIO(self._readable_cont)
-
-

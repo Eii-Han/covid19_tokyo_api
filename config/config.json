@@ -13,7 +13,7 @@
          }
     },
     "yokohama": {
-        "csv_url": "https://www.city.yokohama.lg.jp/city-info/koho-kocho/koho/topics/corona-data.files/141003_yokohama_covid19_patients.csv",
+        "csv_url": "https://www.city.yokohama.lg.jp/kurashi/kenko-iryo/yobosesshu/kansensho/coronavirus/corona-data.files/141003_yokohama_covid19_patients.csv",
         "encoding": "utf-8",
         "date_key": "date",
         "date_format": "%Y-%m-%d",

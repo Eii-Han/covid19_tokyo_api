@@ -16,13 +16,52 @@ paths:
       operationId: "corona.get_patients"
       tags:
         - patients_number
-      summary: tbc
-      description: tbc
+      summary: 指定した条件に従って感染者の一覧を取得する
+      description: 指定した条件に従って感染者の一覧を取得する。
       parameters:
+        - name: area
+          in: query
+          type: string
+          required: true
         - name: address
           in: query
           type: string
           required: true
+        - name: start_date
+          in: query
+          type: string
+          required: true
+        - name: end_date
+          in: query
+          type: string
+          required: true
+        - name: option_keys
+          in: query
+          type: array
+          items:
+            type: string
+          required: false
+        - name: option_values
+          in: query
+          type: array
+          items:
+            type: string
+        - name: offset
+          in: query
+          type: integer
+          format: int32
+          required: false
+        - name: limit
+          in: query
+          type: integer
+          format: int32
+          required: false
+        - name: force
+          in: query
+          type: boolean
+          required: false
       responses:
         200:
           description: good
+
+# DataFrameを更新するAPIが必要です。

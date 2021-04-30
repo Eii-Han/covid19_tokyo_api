@@ -6,8 +6,8 @@ from common.pandas_man import PandasHolder, DataFrameMan
 
 conf_man = ConfigMan('config/config.json')
 
-data_name = 'kanagawa'
-#data_name = 'yokohama'
+# data_name = 'kanagawa'
+data_name = 'yokohama'
 conf_json = conf_man.get_conf(data_name)
 #conf_json = conf_man.get_conf('yokohama')
 

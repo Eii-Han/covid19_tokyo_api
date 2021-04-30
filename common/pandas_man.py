@@ -10,11 +10,12 @@ import enum
 import typing
 
 from common.singleton import Singleton
-from flask.cli import _validate_key
 from builtins import staticmethod
+
 
 class InvalidKeyError(Exception):
     pass
+
 
 class DataFrameMetaKey(enum.Enum):
     """DataFrameのメタ情報キーの値を保存する列挙型
@@ -25,10 +26,10 @@ class DataFrameMetaKey(enum.Enum):
     DATAFRAME:　DataFrame本体
 
     """
-
     CREATED_DATE = "_createdDate"
     UPDATED_DATE = "_updatedDate"
     DATAFRAME = "dated_df"
+
 
 class PandasHolder(metaclass=Singleton):
     """pandasの地域感染情報保存用のクラス
@@ -163,6 +164,13 @@ class DataFrameMan(metaclass=Singleton):
             addr_df = self.search_dataframe_value(dataframe, addr_col, address)
             df_list.append(addr_df)
         return self._concat_dateframe_list(df_list)
-        
-if __name__ == "__main__":
-    PandasHolder()
+
+    @staticmethod
+    def limit_records(dataframe: pd.DataFrame, offset: int, limit: int):
+        if offset is None and limit is None:
+            return dataframe
+        elif offset is None:
+            offset = 0
+        elif limit is None:
+            return dataframe.iloc[offset:]
+        return dataframe.iloc[offset:offset+limit]
