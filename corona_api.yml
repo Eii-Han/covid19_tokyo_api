@@ -11,9 +11,9 @@ produces:
 basePath: "/corona"
 
 paths:
-  /1.0/number/patients:
+  /1.0/number/patients_list:
     get: 
-      operationId: "corona.get_patients"
+      operationId: "corona.get_patients_list"
       tags:
         - patients_number
       summary: 指定した条件に従って感染者の一覧を取得する
@@ -63,5 +63,74 @@ paths:
       responses:
         200:
           description: good
+        500:
+          description: bad
+  /1.0/number/patients_number:
+    get:
+      operationId: "corona.get_numbers"
+      tags:
+        - patients_number
+      summary: 指定した条件に従って感染者の一覧を取得する
+      description: 指定した条件に従って感染者の一覧を取得する。
+      parameters:
+        - name: area
+          in: query
+          type: string
+          required: true
+        - name: start_date
+          in: query
+          type: string
+          required: true
+        - name: end_date
+          in: query
+          type: string
+          required: true
+        - name: address
+          in: query
+          type: string
+          required: false
+        - name: force
+          in: query
+          type: boolean
+          required: false
+      responses:
+        200:
+          description: good
+        500:
+          description: bad
+
 
 # DataFrameを更新するAPIが必要です。
+  /1.0/number/options:
+    get:
+      operationId: "corona.get_options"
+      tags:
+        - patients_number
+      summary: tbc
+      description: tbc
+      parameters:
+        - name: area
+          in: query
+          type: string
+          required: true
+        - name: address
+          in: query
+          type: string
+          required: true
+        - name: start_date
+          in: query
+          type: string
+          required: true
+        - name: end_date
+          in: query
+          type: string
+          required: true
+        - name: force
+          in: query
+          type: boolean
+          required: false
+      responses:
+        200:
+          description: good
+        500:
+          description: bad

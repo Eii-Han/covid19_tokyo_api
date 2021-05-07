@@ -5,6 +5,10 @@ import logging.handlers
 import yaml
 
 
+class NoLevelError(Exception):
+    pass
+
+
 class SyslogMan(metaclass=Singleton):
 
     def __init__(self, filepath: str):
@@ -23,7 +27,8 @@ class SyslogMan(metaclass=Singleton):
         elif level == 'critical':
             self._logger.critical(message)
         else:
-            pass
+            raise NoLevelError('メッセージのレベルを指定していません。')
+
 
 if __name__ == '__main__':
     sm = SyslogMan(filepath="../config/logger.yaml")

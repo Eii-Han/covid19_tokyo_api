@@ -5,6 +5,7 @@ from common.pandas_man import PandasHolder
 from common.syslogman import SyslogMan
 import collections
 
+
 class Controller(metaclass=Singleton):
 
     def __init__(self):

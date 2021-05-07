@@ -26,5 +26,31 @@
            "患者_状態": "condition",
            "公表日": "date"
          }
+    },
+  "tokyo": {
+    "csv_url": "https://stopcovid19.metro.tokyo.lg.jp/data/130001_tokyo_covid19_patients.csv",
+    "encoding": "utf-8",
+    "date_key": "date",
+    "date_format": "%Y-%m-%d",
+    "_address_columns": ["prefecture", "city"],
+    "address_columns": ["prefecture"],
+    "change_columns": {
+      "No": "patient_no",
+      "都道府県名": "prefecture",
+      "市区町村名": "city",
+      "公表_年月日": "date",
+      "発症_年月日": "onset_of_symptoms",
+      "確定_年月日": "confirmation_date",
+      "患者_居住地": "place_of_living",
+      "患者_年代": "age",
+      "患者_性別": "gender",
+      "患者_職業": "occupation",
+      "患者_状態": "condition",
+      "患者_症状": "symptoms",
+      "患者_渡航歴の有無フラグ": "travelling_flag",
+      "患者_接触歴の有無フラグ": "contact_history_flag",
+      "備考": "remarks",
+      "退院済フラグ": "discharge_flag"
     }
+  }
 }
