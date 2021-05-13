@@ -3,6 +3,7 @@ import traceback
 from flask import request
 from common.pandas_man import DataFrameMan
 from common.controller import Controller
+from distutils.util import strtobool
 
 
 def get_patients():
@@ -12,8 +13,8 @@ def get_patients():
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
     forced = request.args.get('forced')
-    # Null排除
-    forced = forced if forced else False
+    forced = forced if forced else "false"
+    forced = strtobool(forced)
 
     offset = request.args.get('offset', type=int)
     limit = request.args.get('limit', type=int)
@@ -80,6 +81,8 @@ def get_options():
         start_date = request.args.get('start_date')
         end_date = request.args.get('end_date')
         forced = request.args.get('forced')
+        forced = forced if forced else "false"
+        forced = strtobool(forced)
 
         df = controller.get_dataframe(area, forced)
         conf_json = controller.get_config_json(area)

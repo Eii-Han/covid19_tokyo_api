@@ -10,6 +10,7 @@ import enum
 import typing
 
 from common.singleton import Singleton
+from common.patient_file import PatientFileReader
 from builtins import staticmethod
 
 
@@ -46,30 +47,39 @@ class PandasHolder(metaclass=Singleton):
         """
         self._data_src = dict()
 
-    def add_data(self, data_name: str, data_obj: io.StringIO, rename_dict: dict, forced: bool = False) -> None:
+    def add_data(self, data_name: str, conf_json: dict, forced: bool = False) -> None:
         """新しい感染情報を追加するメソッド
 
-        指定した地域の当日の最新感染情報をDataFrameに追加・更新するメソッド
-        forcedが真の場合、当日のデータがあっても強制更新を実行する
+        指定した地域の当日の最新感染情報をDataFrameに追加・更新するメソッド。
+        forcedが真の場合、当日のデータがあっても強制更新を実行する。
+        すでに当日のデータが追加した場合、何もしません。
 
         Args:
             data_name: 地域の感染情報データの識別名
-            data_obj:感染情報データのファイルオブジェクト
-            rename_dict: 各カラムの再命名するためのメタ情報
+            conf_json:感染情報データのファイルオブジェクト
             forced: 強制更新かどうかを判定するための引数
         """
 
         # 現在時刻を取得
         dt_now = datetime.datetime.now()
-        now_str = dt_now.strftime('%Y-%m-%d %H:%M:%S')
+        now_str = dt_now.strftime('%Y-%m-%d')
+        rename_dict = conf_json.get('change_columns')
+        updated_date = self.get_data(data_name, DataFrameMetaKey.UPDATED_DATE)
 
         # 患者データをキャッシュに保存するデータフレームを生成
-        if forced or now_str != self.get_data(data_name, DataFrameMetaKey.UPDATED_DATE):
+        print(f"forced={forced}")
+        print(f"now_str={now_str}, updated_date={updated_date}, now_str==updated_date: {now_str == updated_date}")
+        if forced or now_str != updated_date:
             if not self._data_src.get(data_name):
                 self._data_src[data_name] = dict()
                 self._data_src[data_name][DataFrameMetaKey.CREATED_DATE] = now_str
+            print("Force update")
+            file_reader = PatientFileReader(conf_json['csv_url'], conf_json['encoding'])
             self._data_src[data_name][DataFrameMetaKey.UPDATED_DATE] = now_str
-            self._data_src[data_name][DataFrameMetaKey.DATAFRAME] = self._create_dataframe(data_obj, rename_dict)
+            self._data_src[data_name][DataFrameMetaKey.DATAFRAME] = self._create_dataframe(
+                file_reader.get_csv_file_like_obj, rename_dict)
+        else:
+            print("no dataframe update")
 
     def get_data(self, data_name: str, meta_key: typing.Union[DataFrameMetaKey, str]) -> typing.Any:
         """特定のデータ取得メソッド
@@ -266,13 +276,15 @@ class DataFrameMan(metaclass=Singleton):
     def limit_records(dataframe: pd.DataFrame, offset: int, limit: int) -> pd.DataFrame:
         """レコード数の取得を制限するメソッド
 
+        offsetとlimitは受け取って、DataFrameの大きさを制限する。
+
         Args:
-            dataframe:
-            offset:
-            limit:
+            dataframe:　データフレーム
+            offset:　offset番目の行から選択する
+            limit:　選択する行の数を制限する
 
         Returns:
-
+            制限されたデータフレーム
         """
         if offset is None and limit is None:
             return dataframe
@@ -284,6 +296,17 @@ class DataFrameMan(metaclass=Singleton):
 
     @staticmethod
     def get_column_values(dataframe: pd.DataFrame) -> dict:
+        """各カラムが入っている値のリスト取得するメソッド
+
+        各カラムをループで回して、値をセットに入れて重複排除を実施して、
+        辞書型に入れてリターンする
+
+        Args:
+            dataframe: データフレーム
+
+        Returns:
+            各カラムの値一覧
+        """
         results = dict()
         for c_name, items in dataframe.iteritems():
             for item in items:

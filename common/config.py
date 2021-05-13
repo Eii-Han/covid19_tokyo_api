@@ -7,6 +7,7 @@ import json
 import enum
 from common.singleton import Singleton
 
+
 class AreaConfigKey(enum.Enum):
     """設定キーの値を保存する列挙型
 
@@ -14,7 +15,6 @@ class AreaConfigKey(enum.Enum):
 　　　　CSV_URL：CSVファイルソースのURL（提供されている都道府県）
 
     """
-
     CSV_URL = "csv_url"
     ENCODING = "encoding"
     DATE_KEY = "date_key"
@@ -24,6 +24,7 @@ class AreaConfigKey(enum.Enum):
 class NoSuchAreaError(Exception):
     """設定されている地域以外の地域が選択されたときのエラー"""
     pass
+
 
 class ConfigMan(metaclass=Singleton):
     """設定情報を管理するマネージャ
@@ -37,8 +38,7 @@ class ConfigMan(metaclass=Singleton):
         with open(conf_filepath, "r") as conf_file:
             self._conf = json.load(conf_file)
 
-
-    def get_conf(self, area): #県or市
+    def get_conf(self, area):
         """設定情報を取得
 
         指定した都道府県の設定情報を取得する
@@ -55,10 +55,3 @@ class ConfigMan(metaclass=Singleton):
         if not self._conf.get(area):
             raise NoSuchAreaError(f'指定した地域の設定ファイルが存在しません。area={area}')
         return self._conf[area]
-
-
-if __name__ == "__main__":
-
-    confman = ConfigMan('../config/config.json')
-    print(confman.get_conf('kanagawa'))
-    print(confman.get_conf('yokohama'))
