@@ -55,6 +55,12 @@ class Controller(metaclass=Singleton):
     def get_dataframe(self, area: str, force: bool) -> pd.DataFrame:
         """データフレーム取得メソッド
 
+        以下の処理を行います。
+        ・定義ファイルクラスから指定した地域の設定を取得
+        ・PandasHolderにキャッシュされたデータを更新
+        　もともと存在しない場合、新規取得
+        ・データフレームを取得してリターンする
+
         Args:
             area: データフレーム取得対象の地域
             force: 強制更新かどうか
@@ -69,6 +75,20 @@ class Controller(metaclass=Singleton):
         return df
 
     def flatten(self, args):
+        """二次元の配列を一次元に平坦化するメソッド
+
+        対象配列をループで回し、平坦化可能のものなら、yield from文でこのメソッドを再帰呼び出して
+        処理を委譲する。
+        ※yield from iterableは for item in iterable: yield itemと同等らしいです
+
+        平坦化不可能まで平坦化した場合、一般的なyield文でジェネレータに委譲する。
+
+        Args:
+            args:平坦化対象の多次元リスト
+
+        Yields:
+            最低次元（一次元）の文字列またはバイト型
+        """
         for arg in args:
             if isinstance(arg, collections.abc.Iterable) and not isinstance(arg, (str, bytes)):
                 yield from self.flatten(arg)

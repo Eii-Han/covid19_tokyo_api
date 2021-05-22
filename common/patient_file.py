@@ -11,7 +11,6 @@ class PatientFileReader(object):
     
     Attributes:
         _readable_cont: デコード済みの地域データ
-
     """
 
     def __init__(self, get_url: str, encoding: str = "utf-8"):
